@@ -1,0 +1,127 @@
+<!DOTYPE html>
+<html>
+<head>
+<title>My website</title>
+<script type="text/javascript">
+
+      // The Browser API key obtained from the Google API Console.
+      var developerKey = '##########################################';
+
+      // The Client ID obtained from the Google API Console. Replace with your own Client ID.
+      var clientId = '##################################################';
+
+      // Scope to use to access user's photos.
+      var scope = 'https://www.googleapis.com/auth/drive';
+
+      var appId = "###################";
+
+      var pickerApiLoaded = false;
+      var oauthToken;
+      var ids=[];
+      // Use the API Loader script to load google.picker and gapi.auth.
+      function onApiLoad() {
+        gapi.load('auth2', onAuthApiLoad);
+        gapi.load('picker', onPickerApiLoad);
+	gapi.client.load('drive', 'v2',handleClientLoad);
+      }
+ 	function handleClientLoad() {
+        	gapi.client.setApiKey(apiKey);
+        	window.setTimeout(onAuthApiLoad,1);
+      	}
+
+
+      function onAuthApiLoad() {
+        var authBtn = document.getElementById('auth');
+        authBtn.disabled = false;
+        authBtn.addEventListener('click', function() {
+          gapi.auth2.authorize({
+            client_id: clientId,
+            scope: scope
+          }, handleAuthResult);
+        });
+      }
+
+      function onPickerApiLoad() {
+        pickerApiLoaded = true;
+        createPicker();
+      }
+
+      function handleAuthResult(authResult) {
+        if (authResult && !authResult.error) {
+          oauthToken = authResult.access_token;
+	  ids.push(oauthToken);
+          createPicker();
+        }
+      }
+
+      // Create and render a Picker object for picking user Photos.
+      function createPicker() {
+        if (pickerApiLoaded && oauthToken) {
+	var view = new google.picker.View(google.picker.ViewId.DOCS);
+        view.setMimeTypes("image/png,image/jpeg,image/gif");
+          var picker = new google.picker.PickerBuilder().
+	      enableFeature(google.picker.Feature.NAV_HIDDEN).
+	      enableFeature(google.picker.Feature.MULTISELECT_ENABLED).
+              setOAuthToken(oauthToken).
+	      setAppId(appId).
+	      addView(view).
+              setDeveloperKey(developerKey).
+              setCallback(pickerCallback).
+              build();
+          picker.setVisible(true);
+        }
+      }
+      // A simple callback implementation.
+      function pickerCallback(data) { 
+        var url = 'nothing';
+	var names = [];
+	var mimes = []
+        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+	var ln = data[google.picker.Response.DOCUMENTS];
+	for(i=0;i<ln.length;i++) {
+         ids.push(data.docs[i].id); 
+	 var mime = ln[i][google.picker.Document.MIME_TYPE];
+	 var name = ln[i][google.picker.Document.NAME];
+	 names.push(name);
+	 mimes.push(mime); 
+	  }
+	
+	document.getElementById('aufileids').value = ids;
+	document.getElementById('result3').innerHTML = names;
+	/*document.getElementById('result4').innerHTML = mimes;*/
+		}
+	}
+</script>
+<style>
+html { 
+	background: url({{ url_for('static', filename='background.jpeg') }}) fixed center center no-repeat;
+	-webkit-background-size:cover;
+	-moz-background-size:cover;
+	-o-background-size:cover;
+	background-size: cover;
+}
+</style>
+</head>
+<body>
+<h1 style="position:relative;top:15%;color:white;font-size:50px;" align="center"> Welcome to detect the colours of your image </h1>
+<!--<section id = "bod ="  style="background-color: lightblue; border-style:solid; border-width:thin;position:fixed;top:30%;width:50%;left:30%;"> -->
+<form id="upload-form" action="{{ url_for('upload') }}" method = "POST" enctype="multipart/form-data" style="background-color:white; border-style:solid; border-radius: 35px; border-width:thin;position:fixed;top:29%;width:40%;left:30%; height:100" >
+	<input type = "file" name="file" accept="image/png,image/gif,image/jpeg" multiple style="position:fixed;left:33%;top:32.5%">
+	<input type="submit" value="detect colors" style="position:fixed;left:62%;top:32.5%" >
+</form>
+<!--</section> -->
+
+<section id = "bod2" style="background-color: white; border-style:solid;border-radius: 35px;border-width:thin;position:fixed;left:30%;top:69%;width:40%;height:100">
+	<button type="button" id="auth" style='position:fixed;left:31%;top:73%' value = "upnext">upload from google</button>
+	<form method = "POST" action="/gdrive">
+		<input type= "hidden" name = "auidarray" id = "aufileids" value = "" />
+		<input type = "submit" value = "detect colors" style='position:fixed;left:62%;top:73%' >
+	</form>
+	<div id="result3" style='position:fixed;left:40.8%;top:73%'></div>
+</section>
+<!-- The Google API Loader script. -->
+<script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>
+<script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+<script type="text/javascript" src="https://apis.google.com/js/api.js?onload=loadPicker"></script>
+</body>
+</html>
