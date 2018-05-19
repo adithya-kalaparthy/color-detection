@@ -29,6 +29,5 @@ Ways to use this api:
 
 Note: 	This application has been developed with Python 2.7.12 and tested in ubuntu 16.04, mozilla firefox.
 	Due to confidentiality reasons the api key and Id for google have been removed. Please follow the link https://console.developers.google.com/api to generate api keys and credentials
-	(Developer key, api-id, clientId are required) After generating the credentials please change the credentials in upload.html file
-	The client secret and client id for volumental api have also been removed. Please generate seperate client credentials from volumental
+	(Developer key, api-id, clientId are required) After generating the credentials please change the credentials in upload.html file. The client secret and client id for volumental api in jnv.py have also been removed. Please generate seperate client credentials from volumental
 
